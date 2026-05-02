@@ -4,8 +4,6 @@
 
 A production-grade multi-agent platform that analyzes data schemas, models statistical distributions, generates privacy-preserving synthetic datasets, validates fidelity against originals, and audits privacy risk using five LangGraph agents orchestrated with FastAPI, PostgreSQL, Redis, and Streamlit.
 
-[Demo GIF here]
-
 ## What it does
 
 Upload a JSON schema or sample CSV. The platform runs five specialized agents in sequence: schema analysis, distribution modelling, data generation, fidelity validation, and privacy auditing. Download the results as JSON or CSV.
@@ -107,9 +105,9 @@ python assets/generate_logo.py
 
 The API is available at http://localhost:8010. All endpoints except /health, /auth/register, and /auth/login require a JWT Bearer token.
 
-## API Key
+## Groq API Key
 
-This project uses BYOK (Bring Your Own Key). Enter your Groq API key in the Streamlit sidebar at runtime. Keys are used for the current session only and are never stored on disk.
+Set `GROQ_API_KEY` in your `.env` file to enable LLM-enhanced schema analysis and distribution validation via Groq (Llama-3.3-70b-versatile). Leave it blank to run entirely on deterministic statistical logic — all five agents operate without an API key.
 
 ## Tests
 
