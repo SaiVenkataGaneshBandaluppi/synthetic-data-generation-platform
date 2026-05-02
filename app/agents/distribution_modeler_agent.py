@@ -74,7 +74,7 @@ def _fit_text(col_stats: dict, col_name: str) -> dict:
 
 
 class DistributionModelerAgent:
-    def run(self, schema_analysis: dict) -> dict:
+    def run(self, schema_analysis: dict, groq_api_key: str = "") -> dict:
         columns = schema_analysis.get("columns", [])
         column_models = []
         for col in columns:
@@ -107,7 +107,7 @@ class DistributionModelerAgent:
                 }
             )
 
-        groq_result = self._try_groq_enhancement(column_models)
+        groq_result = self._try_groq_enhancement(column_models, api_key=groq_api_key)
         if groq_result and isinstance(groq_result.get("column_models"), list):
             enhanced = groq_result["column_models"]
             if len(enhanced) == len(column_models):
@@ -118,7 +118,7 @@ class DistributionModelerAgent:
             "relationships": schema_analysis.get("relationships", []),
         }
 
-    def _try_groq_enhancement(self, column_models: list[dict]) -> dict | None:
+    def _try_groq_enhancement(self, column_models: list[dict], api_key: str = "") -> dict | None:
         prompt = json.dumps(
             {"task": "validate_distributions", "column_models": column_models},
             default=str,
@@ -129,4 +129,4 @@ class DistributionModelerAgent:
             "with any corrections. Keep all original keys. Only modify distribution or "
             "params if clearly wrong."
         )
-        return groq_complete(prompt, system, max_tokens=1024)
+        return groq_complete(prompt, system, max_tokens=1024, api_key=api_key)

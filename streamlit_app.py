@@ -19,7 +19,11 @@ def _get_headers() -> dict:
     token = st.session_state.get("access_token")
     if not token:
         return {}
-    return {"Authorization": f"Bearer {token}"}
+    groq_api_key = st.session_state.get("groq_api_key", "")
+    return {
+        "Authorization": f"Bearer {token}",
+        "X-Groq-Key": groq_api_key,
+    }
 
 
 def _api(method: str, path: str, **kwargs) -> requests.Response:

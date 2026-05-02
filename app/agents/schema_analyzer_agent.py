@@ -125,15 +125,15 @@ def _detect_relationships(df: pd.DataFrame, columns: list[dict]) -> list[dict]:
 
 
 class SchemaAnalyzerAgent:
-    def run(self, raw_input: dict, sample_records: list[dict]) -> dict:
+    def run(self, raw_input: dict, sample_records: list[dict], groq_api_key: str = "") -> dict:
         if sample_records:
             df = pd.DataFrame(sample_records)
-            return self._analyze_dataframe(df)
+            return self._analyze_dataframe(df, groq_api_key=groq_api_key)
         if raw_input.get("columns"):
             return self._analyze_json_schema(raw_input)
         return {"columns": [], "row_count": 0, "relationships": []}
 
-    def _analyze_dataframe(self, df: pd.DataFrame) -> dict:
+    def _analyze_dataframe(self, df: pd.DataFrame, groq_api_key: str = "") -> dict:
         columns = []
         for col in df.columns:
             col_type = _infer_column_type(df[col])
@@ -148,7 +148,7 @@ class SchemaAnalyzerAgent:
                 }
             )
         relationships = _detect_relationships(df, columns)
-        groq_hints = self._try_groq_enhancement(columns)
+        groq_hints = self._try_groq_enhancement(columns, api_key=groq_api_key)
         if groq_hints:
             columns = groq_hints.get("columns", columns)
         return {
@@ -217,7 +217,7 @@ class SchemaAnalyzerAgent:
             )
         return {"columns": columns, "row_count": 0, "relationships": []}
 
-    def _try_groq_enhancement(self, columns: list[dict]) -> dict | None:
+    def _try_groq_enhancement(self, columns: list[dict], api_key: str = "") -> dict | None:
         prompt = json.dumps(
             {"task": "validate_column_types", "columns": columns}, default=str
         )
@@ -227,4 +227,4 @@ class SchemaAnalyzerAgent:
             "same list with corrected types if needed. Valid types: numeric, categorical, "
             "datetime, boolean, text. Keep all original fields."
         )
-        return groq_complete(prompt, system, max_tokens=1024)
+        return groq_complete(prompt, system, max_tokens=1024, api_key=api_key)

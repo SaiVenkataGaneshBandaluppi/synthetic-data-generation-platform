@@ -29,8 +29,18 @@ def groq_complete(
     system: str,
     max_tokens: int = 2048,
     model: str = "llama-3.3-70b-versatile",
+    api_key: str = "",
 ) -> dict | None:
-    client = _build_client()
+    if api_key:
+        try:
+            from groq import Groq
+
+            client = Groq(api_key=api_key)
+        except Exception as err:
+            logger.warning("Failed to build Groq client with provided key: %s", err)
+            return None
+    else:
+        client = _build_client()
     if client is None:
         return None
     try:

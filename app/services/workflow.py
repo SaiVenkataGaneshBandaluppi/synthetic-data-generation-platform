@@ -19,6 +19,7 @@ class WorkflowState(TypedDict):
     sample_records: list[dict]
     domain: str
     row_count: int
+    groq_api_key: str
     schema_analysis: dict | None
     distribution_model: dict | None
     generated_records: list[dict] | None
@@ -30,7 +31,7 @@ class WorkflowState(TypedDict):
 def _analyze_schema_node(state: WorkflowState) -> dict:
     try:
         agent = SchemaAnalyzerAgent()
-        result = agent.run(state["raw_input"], state["sample_records"])
+        result = agent.run(state["raw_input"], state["sample_records"], groq_api_key=state.get("groq_api_key", ""))
         return {"schema_analysis": result}
     except Exception as err:
         logger.exception("schema_analyzer_agent failed")
@@ -42,7 +43,7 @@ def _model_distributions_node(state: WorkflowState) -> dict:
         return {}
     try:
         agent = DistributionModelerAgent()
-        result = agent.run(state["schema_analysis"] or {})
+        result = agent.run(state["schema_analysis"] or {}, groq_api_key=state.get("groq_api_key", ""))
         return {"distribution_model": result}
     except Exception as err:
         logger.exception("distribution_modeler_agent failed")
@@ -121,12 +122,14 @@ async def run_generation_workflow(
     sample_records: list[dict],
     domain: str,
     row_count: int,
+    groq_api_key: str = "",
 ) -> WorkflowState:
     initial_state: WorkflowState = {
         "raw_input": raw_input,
         "sample_records": sample_records,
         "domain": domain,
         "row_count": row_count,
+        "groq_api_key": groq_api_key,
         "schema_analysis": None,
         "distribution_model": None,
         "generated_records": None,

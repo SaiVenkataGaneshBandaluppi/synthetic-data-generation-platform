@@ -6,7 +6,7 @@ import re
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, field_validator
 from sqlalchemy import select
@@ -335,6 +335,7 @@ async def delete_job(
 async def run_job(
     request: Request,
     job_id: str,
+    x_groq_key: str = Header(default=""),
     current_user: User = Depends(_get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> JobResponse:
@@ -372,6 +373,7 @@ async def run_job(
             sample_records=sample_records,
             domain=job.domain,
             row_count=job.row_count_requested,
+            groq_api_key=x_groq_key,
         )
     except Exception as err:
         logger.exception("Workflow execution error for job %s", job_id)
