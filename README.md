@@ -69,16 +69,16 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Run the API server on port 8010 (set via PORT env or in your process manager):
+Run the API server on port 8010:
 
 ```
-uvicorn app.main:app
+uvicorn app.main:app --host 0.0.0.0 --port 8010
 ```
 
-Run the Streamlit dashboard on port 8505 (Streamlit reads STREAMLIT_SERVER_PORT):
+Run the Streamlit dashboard on port 8505:
 
 ```
-streamlit run streamlit_app.py
+streamlit run streamlit_app.py --server.port 8505
 ```
 
 Generate sample schema files for testing:
@@ -107,7 +107,11 @@ The API is available at http://localhost:8010. All endpoints except /health, /au
 
 ## Groq API Key
 
-Set `GROQ_API_KEY` in your `.env` file to enable LLM-enhanced schema analysis and distribution validation via Groq (Llama-3.3-70b-versatile). Leave it blank to run entirely on deterministic statistical logic — all five agents operate without an API key.
+Set `GROQ_API_KEY` in your `.env` file to enable LLM-enhanced schema analysis and distribution validation via Groq (Llama-3.3-70b-versatile). Leave it blank to run entirely on deterministic statistical logic; all five agents operate without an API key.
+
+## BYOK - Bring Your Own Key
+
+Enter your Groq API key directly in the Streamlit sidebar when running the application. The key is held in the browser session only, passed per-request via the X-Groq-Key header, and is never written to disk or database. This is separate from the optional server-side GROQ_API_KEY in .env, which acts as a shared fallback for all users.
 
 ## Tests
 
